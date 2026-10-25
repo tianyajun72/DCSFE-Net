@@ -167,11 +167,6 @@ Accordingly, these results characterize performance under controlled Gaussian-no
 
 For reproducibility, the exact training procedure, preprocessing configuration, model checkpoints, and experimental data should be used where available in this repository. Results may vary with the software environment, hardware platform, random initialization, and evaluation protocol.
 
-## Citation
-
-If you use this work in your research, please cite the corresponding paper:
-
-Zeliang An, Yajun Tian, Yuqing Xu, Yiwen Zhu, Abdullah Tahir, Gert Frølund Pedersen, and Ming Shen, "Physical-aware Electromagnetic Signal Recognition for 6G Reconfigurable Intelligent Surface-aided Industrial IoT: A Dual-branch Spiking-Scattering Fusion Framework and Real-World Demonstration."
 
 ## Acknowledgment
 
