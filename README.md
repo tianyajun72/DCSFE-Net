@@ -1,173 +1,166 @@
+# SpikingScattering Signal Classification
 
-# DCSFE-Net: Physics-Aware Electromagnetic Signal Recognition for RIS-Aided Industrial IoT
 
-<p align="center">
-  <strong>Official Implementation and Experimental Results</strong>
-</p>
 
-<p align="center">
-  A Dual-Branch Spiking-Scattering Fusion Framework for 6G RIS-Assisted Industrial Internet of Things
-</p>
+## 1. Overview and current status
 
----
+The script uses TensorFlow/Keras and Kymatio for multiclass classification of two-channel, one-dimensional signals. It extracts wavelet scattering features separately from each channel, concatenates them, applies a 1D convolution and a dense classifier, and plots training and validation curves.
 
-## Overview
+**The file contains model construction, training, and plotting code, but it is not a complete standalone experiment entry point.** It does not define `Len_signal`, `class_num`, `Train_signal_data`, or `label_data_train`, and contains no data-loading statements. Prepare real data and define these variables before running it; installing dependencies alone does not resolve these omissions.
 
-Electromagnetic Signal Recognition (ESR) is an important enabling technology for spectrum management, interference identification, and reliable wireless communications in next-generation industrial Internet of Things (IIoT) networks. In 6G Reconfigurable Intelligent Surface (RIS)-assisted environments, electromagnetic signals may experience severe multipath propagation, non-line-of-sight (NLOS) blockage, reflection-induced waveform distortions, and noise interference. These practical impairments make reliable signal recognition challenging for conventional data-driven neural networks.
+This README describes the original script above. 
 
-To address these challenges, this project presents **DCSFE-Net (Dual-Branch Spiking-Scattering Fusion Network)**, a physics-aware electromagnetic signal recognition framework designed for RIS-assisted industrial wireless environments. The proposed architecture integrates wavelet scattering transforms with spiking neural networks (SNNs), combining deformation-stable signal representations with temporal spike-based feature encoding.
+## 2. Suggested environment and dependencies
 
-By processing the in-phase (I) and quadrature (Q) components through complementary branches and adaptively fusing their learned representations, DCSFE-Net aims to improve signal discriminability, noise robustness, and inference efficiency.
 
-Unlike approaches evaluated exclusively in idealized simulated channels, this study incorporates a physical RIS measurement platform to investigate recognition performance under realistic electromagnetic propagation conditions.
+| Component / pip package | Suggested version | Purpose and usage in the script |
+| --- | --- | --- |
+| Python | 3.10, 64-bit | Interpreter; use a dedicated Conda environment |
+| `tensorflow` | 2.10.1 | Tensor operations, custom layers, and training backend |
+| `keras` | 2.10.0 | Model, classifier layers, and callbacks; paired with TensorFlow 2.10 |
+| `kymatio` | 0.3.0 | The `kymatio.keras.Scattering1D` wavelet scattering layer |
+| `numpy` | 1.23.5 | Arrays, normalization, and plot tick positions |
+| `scipy` | 1.10.1 | `scipy.io` is imported; no `.mat` file is loaded in the original script |
+| `scikit-learn` | 1.2.2 | `shuffle` and `confusion_matrix` are imported but not called |
+| `matplotlib` | 3.7.5 | Confusion-matrix helper and training curves |
 
-## Key Contributions
+`os` is part of Python's standard library, needs no separate installation, and is currently unused. The pip package name for `sklearn` is `scikit-learn`. All third-party packages in the table are required if the original imports are retained, including imports unused later in the script.
 
-### 1. Physics-Aware Electromagnetic Signal Recognition
+Start with CPU checks, then use an NVIDIA GPU if needed. Native Windows CUDA support ends at TensorFlow 2.10; the corresponding legacy GPU configuration uses CUDA 11.2 and cuDNN 8.1. See the [TensorFlow Windows configuration table](https://www.tensorflow.org/install/source_windows#gpu).
 
-The proposed framework incorporates signal-processing principles associated with electromagnetic propagation into the feature extraction architecture. Wavelet scattering transforms provide multiscale representations with deformation stability, helping preserve discriminative signal characteristics under propagation-induced distortions.
+Kymatio 0.3.0 officially lists Linux and macOS as supported systems. Run the checks below for the proposed Windows setup; consider WSL2/Linux if platform compatibility issues occur. See the [Kymatio 0.3.0 installation notes](https://pypi.org/project/kymatio/0.3.0/).
 
-### 2. Spiking-Scattering Feature Learning
+## 3. Installation and environment checks
 
-DCSFE-Net combines two complementary mechanisms:
+Run these commands in PowerShell with Conda available, or in Anaconda Prompt:
 
-- **Wavelet Scattering Transform:** Extracts multiscale spectral-temporal features using cascaded wavelet convolutions, nonlinear modulus operations, and low-pass filtering.
-- **Spiking Neural Network:** Encodes temporal information through membrane-potential dynamics, threshold-triggered spike generation, and subtractive soft-reset operations.
-
-This combination is designed to retain useful signal structures while reducing the influence of weak or noise-corrupted temporal components.
-
-### 3. Dual-Branch I/Q Feature Fusion
-
-The network processes the in-phase and quadrature components through two complementary feature extraction branches. Their learned representations are subsequently combined through an adaptive fusion mechanism, allowing the classifier to exploit complementary information contained in the complex-valued received signal.
-
-### 4. Physical RIS Testbed Validation
-
-The experimental framework integrates a programmable RIS metasurface with a professional RF signal generation and measurement chain. The physical platform enables the collection and evaluation of electromagnetic signals under RIS-assisted propagation, including NLOS configurations and reflection-induced channel impairments.
-
-### 5. Recognition Performance and Computational Efficiency
-
-The study evaluates DCSFE-Net against representative deep-learning-based ESR methods, including LSTM, TCNet, ComplexNet, and other signal recognition baselines.
-
-Recognition accuracy, computational complexity, inference latency, and the contributions of individual architectural components are investigated through comparative and ablation experiments.
-
-## Network Architecture
-
-The proposed DCSFE-Net consists of four main functional components:
-
-1. **Wavelet Scattering Transform:** Extracts deformation-stable, multiscale signal features.
-2. **Spiking Neural Network:** Encodes temporal dynamics into spike-based representations.
-3. **Dual-Branch Fusion Module:** Integrates complementary I/Q branch features for discriminative representation learning.
-4. **Decision-Making Module:** Uses a multilayer perceptron (MLP) classifier to predict the electromagnetic signal class.
-
-The overall processing pipeline can be summarized as follows:
-
-```text
-Received RF Signal
-        |
-        v
-   I/Q Decomposition
-        |
-        v
- Dual-Branch Feature Extraction
-        |
-        +-------------------------+
-        |                         |
-        v                         v
- Wavelet Scattering       Spiking Temporal
- Feature Learning         Feature Encoding
-        |                         |
-        +------------+------------+
-                     |
-                     v
-             Feature Fusion
-                     |
-                     v
-              MLP Classifier
-                     |
-                     v
-          Predicted Signal Class
+```powershell
+conda create -n spiking-scatter python=3.10 -y
+conda activate spiking-scatter
+python -m pip install --upgrade pip
+python -m pip install tensorflow==2.10.1 keras==2.10.0 kymatio==0.3.0 numpy==1.23.5 scipy==1.10.1 scikit-learn==1.2.2 matplotlib==3.7.5
+python -m pip check
 ```
 
-The central idea is to combine the robustness of physics-inspired signal representations with the temporal modeling capability of spiking neural networks, rather than relying solely on conventional convolutional or recurrent feature learning.
+Check imports, then run a scattering-layer forward pass without training data:
 
-## Experimental Setup
+```powershell
+python -c "import numpy, scipy, sklearn, matplotlib, keras, tensorflow, kymatio; print('Imports OK')"
+python -c "import tensorflow as tf; from kymatio.keras import Scattering1D; x=tf.zeros([2, 1000], dtype=tf.float32); s=Scattering1D(J=2, Q=2)(x); print('Scattering shape:', s.shape); print('GPU:', tf.config.list_physical_devices('GPU'))"
+```
 
-### Signal Classes
+The second command uses two zero signals of length 1000 solely to check layer construction and computation. Here, 1000 is an example length for this check, not a signal length configured in the original script. The scattering output should be a rank-3 tensor with a batch dimension of 2. An empty GPU list, `[]`, is expected for a CPU setup. Passing these checks does not supply the missing dataset or establish full experimental reproduction.
 
-The experimental dataset covers seven electromagnetic signal formats:
+For optional native Windows GPU use, install a compatible NVIDIA driver and configure CUDA/cuDNN in this environment following the [TensorFlow installation guide](https://www.tensorflow.org/install/pip#windows-native). Skip this step for CPU use:
 
-- BPSK
-- QPSK
-- 8PSK
-- 2FSK
-- 16APSK
-- 16QAM
-- 64QAM
+```powershell
+conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
+python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+```
 
-### Dataset Configuration
+If TensorFlow reports DLL loading errors on Windows, check the Microsoft Visual C++ runtime requirements in the same installation guide. Neither PyTorch nor MATLAB is required for this script.
 
-| Parameter | Configuration |
-|---|---|
-| Number of signal classes | 7 |
-| SNR range | -10 dB to 20 dB |
-| SNR interval | 2 dB |
-| Number of SNR levels | 16 |
-| Samples per class per SNR level | 2,250 |
-| Dataset partition | 60% training / 20% validation / 20% testing |
-| Signal representation | In-phase (I) and quadrature (Q) components |
+## 4. Input requirements and preparation
 
-The dataset configuration corresponds to 252,000 signal instances across the seven classes and sixteen SNR levels, based on the sample counts reported in the paper.
+| Variable | Expected shape / type | Meaning |
+| --- | --- | --- |
+| `Train_signal_data` | `(N, L, 2)`, preferably real-valued `float32` | N samples, L time points per sample, and 2 channels |
+| `label_data_train` | `(N, C)`, preferably `float32` | One-hot labels aligned with the signal samples |
+| `Len_signal` | Positive integer L | Signal length, matching the second input dimension |
+| `class_num` | Number of classes C | Must match the label width and Softmax output dimension |
 
-### Physical Measurement Platform
+The two channels could represent I/Q, but the source does not define their meaning; follow the actual dataset specification. Convert complex signals into two real-valued channels if appropriate, and verify the time and channel axes. The configured `categorical_crossentropy` loss expects categorical targets: do not directly substitute integer labels of shape `(N,)` for one-hot labels. Encode them first, or separately adapt the loss.
 
-The real-world measurement setup includes:
+The original script does not specify a data format, file path, MATLAB field names, or class names. The following is an **example `.npz` loader to add yourself**. Its path and keys are example conventions and must match a real, prepared dataset:
 
-- A programmable RIS metasurface with a diagonal dimension of approximately 0.6 m.
-- A 16 × 16 reflective-element array comprising 256 elements.
-- A Rohde & Schwarz SMBV100B vector signal generator.
-- A Rohde & Schwarz FSW spectrum analyzer.
-- A transmission configuration centered at 4.8 GHz with a signal bandwidth of 100 MHz.
+```python
+# Insert after the imports and before the SpikingScattering class definition.
+with np.load(r"D:\path\to\your_training_data.npz") as data:
+    Train_signal_data = np.asarray(data["Train_signal_data"], dtype=np.float32)
+    label_data_train = np.asarray(data["label_data_train"], dtype=np.float32)
 
-This platform supports experimental investigation of RIS-assisted signal propagation and provides a hardware-based foundation for evaluating electromagnetic signal recognition.
+assert Train_signal_data.ndim == 3 and Train_signal_data.shape[-1] == 2
+assert label_data_train.ndim == 2
+assert Train_signal_data.shape[0] == label_data_train.shape[0]
+assert np.isfinite(Train_signal_data).all() and np.isfinite(label_data_train).all()
+assert np.all((label_data_train == 0) | (label_data_train == 1))
+assert np.allclose(label_data_train.sum(axis=1), 1)
 
-## Experimental Results
+Len_signal = int(Train_signal_data.shape[1])
+class_num = int(label_data_train.shape[1])
+```
 
-The paper reports the following representative results:
+You may instead add `sc.loadmat(...)` for a compatible `.mat` file. Inspect its actual field names and dimensions rather than assuming they match this example.
 
-- **Recognition improvement at low SNR:** DCSFE-Net achieves a reported 6.7% recognition-accuracy improvement over conventional baseline methods at an SNR of 4 dB.
-- **Comparison with sequential and convolutional baselines:** At 10 dB SNR, the reported accuracy gains over LSTM and TCNet are 11.28% and 16.35%, respectively.
-- **High-SNR classification:** The confusion matrix reports 100% classification accuracy at 18 dB SNR for the evaluated test configuration.
-- **Computational complexity:** The model contains 263,383 trainable parameters, with a reported training time of approximately 7 seconds per epoch.
-- **Inference efficiency:** The reported testing time is 0.03348 ms under the paper's experimental evaluation setup.
+**Definition order matters:** the source declares `def __init__(..., T=Len_signal, ...)`. Python evaluates default arguments when defining the function, so `Len_signal` must exist before the `SpikingScattering` class is defined. Otherwise, a `NameError` occurs even before model construction. Changing the default to `T=None` is an optional refactoring choice; this documentation task does not modify the source.
 
-Additional experiments investigate the effects of spiking encoding, wavelet scattering, scattering coefficients, SNN convolution stride, RIS orientation, signal observation length, training-data ratio, and dual-branch feature fusion.
+After preparing data and defining the missing variables, run from PowerShell:
 
-Together, these results demonstrate the potential of combining physics-aware scattering representations and spiking temporal encoding for efficient electromagnetic signal recognition in RIS-assisted wireless environments.
+```powershell
+conda activate spiking-scatter
+Set-Location -LiteralPath 'D:\RIS数据集训练\05B 稿件返修\（TCCN）'
+python '.\Main_SpikingScatter_ESR - 副本.py'
+```
 
-## Implementation Environment
+Keep the quotes because the filename contains spaces. The original script has no `--data` argument and no `if __name__ == '__main__'` guard; importing the file also executes its top-level model construction and training statements.
 
-The reported implementation environment includes:
+## 5. Main code workflow
 
-| Component | Version or Specification |
-|---|---|
-| Deep learning framework | TensorFlow 2.10.0 |
-| CUDA | 11.8 |
-| cuDNN | 8.4.1 |
-| Signal preprocessing | MATLAB R2024a |
-| GPU | NVIDIA GeForce RTX 4060, 8 GB memory |
-| Operating system | Windows 11 Professional |
+### 5.1 Helper functions
 
-Actual reproduction may require adapting software dependencies, dataset paths, and hardware configurations to the available environment.
+- `F_normalize(dt)` computes the mean and standard deviation along `axis=0` and returns `(dt - mu) / sigma`. It is not called in the current training path. For `(N, L, 2)` input, this operates across samples. Handle zero standard deviations before using it, and estimate normalization statistics using the training portion only.
+- `plot_confusion_matrix(cm, labels=...)` plots an existing confusion matrix with a color bar, class ticks, and cell counts. Rows represent true classes and columns predicted classes. The helper does not perform prediction or calculate the matrix, and is not called in the current script.
 
-## Experimental Scope and Reproducibility
+### 5.2 Scattering layer and classifier
 
-The low-SNR experiments use controlled additive white Gaussian noise (AWGN) introduced into signals collected using the physical RIS measurement platform.
+```text
+Input (batch, L, 2)
+  ├─ Channel 0 → Scattering1D(J=2, Q=2) → (batch, K, Ls)
+  └─ Channel 1 → Scattering1D(J=2, Q=2) → (batch, K, Ls)
+           ↓ Transpose each output to (batch, Ls, K)
+  Concatenate along the last axis → (batch, Ls, 2K)
+           ↓ Conv1D(filters=16, kernel_size=3, strides=2)
+  Flatten
+           ↓ Dense(128, ReLU) → Dropout(0.2)
+           ↓ Dense(64, ReLU)  → Dropout(0.2)
+           ↓ Dense(C, Softmax)
+  C class probabilities per sample
+```
 
-Accordingly, these results characterize performance under controlled Gaussian-noise conditions combined with real-world signal acquisition. They should not be interpreted as a comprehensive evaluation under all forms of measured industrial interference, such as site-specific colored or impulsive noise.
+`K` is the number of scattering coefficients per channel, and `Ls` is the scattering output's temporal length. Their exact values depend on input length and scattering parameters.
 
-For reproducibility, the exact training procedure, preprocessing configuration, model checkpoints, and experimental data should be used where available in this repository. Results may vary with the software environment, hardware platform, random initialization, and evaluation protocol.
+`SpikingScattering.build()` reads the input length and creates the scattering and convolution layers. Its `call()` method processes each channel, transposes the outputs, concatenates them, and applies the convolution. `Conv1D` does not specify an activation, so it uses a linear activation, with default `valid` padding. `model.summary()` prints the assembled model.
+
+`J=2` controls the maximum scattering scale (`2**J`), and `Q=2` specifies the first-order wavelets per octave. The script does not set `max_order`; Kymatio 0.3.0 defaults to second-order scattering. Its Keras frontend infers the input length during building, so the current `Scattering1D(J=..., Q=...)` call requires no additional `shape` argument. See the [Kymatio Keras API](https://www.kymat.io/codereference.html#kymatio.keras.Scattering1D).
+
+The custom layer's `self.T` records input length but is never passed to Kymatio. It has a different meaning from Kymatio's own `T` parameter, which controls the temporal support of its low-pass filter.
+
+Although the class name contains “Spiking”, the implemented operations are wavelet scattering and an ordinary 1D convolution. The file contains no explicit threshold firing, LIF neuron, or binary spike-encoding operator. Describe the implementation according to these actual operations.
+
+### 5.3 Training configuration
+
+| Setting | Current value |
+| --- | --- |
+| Optimizer | Adam; no explicit learning rate |
+| Loss | `categorical_crossentropy` |
+| Metric | `accuracy` |
+| Batch size | `BATCH_SIZE = 128` |
+| Maximum epochs | `EPOCH = 50` |
+| Validation fraction | `validation_split = 0.3` |
+| Early stopping | Monitor `val_loss`, with `patience = 5` |
+
+`model.fit()` returns `hist`, holding per-epoch training and validation loss and accuracy. Early stopping can end training before 50 epochs. Since `restore_best_weights=True` is not set, training retains the weights from the stopping point. See the [Keras EarlyStopping documentation](https://keras.io/2/api/callbacks/early_stopping/).
+
+For array inputs, Keras reserves roughly the last 30% of supplied samples for validation before shuffling the training portion. This is not a stratified random split. If samples are ordered by class or acquisition sequence, design an appropriate split first. See the [Keras training API](https://keras.io/2/api/models/model_training_apis/).
+
+## 6. Outputs and reproduction notes
+
+- Successful training prints the model summary and training metrics; `model` and `hist` remain in memory.
+- The script creates two figures: training/validation loss and training/validation accuracy. Its `plt.savefig(...)` and `plt.show()` calls are commented out. A regular terminal run therefore saves no plots automatically and may display no figure window; uncomment or add the required calls if needed.
+- There is no `model.save()` call, and the imported `ModelCheckpoint` is unused. The original script does not automatically export models, weights, or training history files.
+- There is no separate test-set evaluation, prediction, or confusion-matrix calculation. The confusion-matrix plotting function is an available helper only.
+- Imported `AveragePooling1D` and `AveragePooling2D` are not part of the model; do not include pooling layers in an architecture description based on imports alone.
+- No random seed is set, so repeated training results may differ. Full reproduction also requires documented data splits, preprocessing, class mappings, environment versions, and random seeds.
+- The confusion-matrix helper uses Times New Roman. Matplotlib may substitute a font or issue a missing-font message if it is unavailable.
 
 
-## Acknowledgment
-
-This work investigates the integration of physics-aware signal processing, spiking neural networks, and programmable electromagnetic environments for robust signal recognition in emerging 6G industrial IoT systems.
