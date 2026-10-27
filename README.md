@@ -1,4 +1,4 @@
-# SpikingScattering Signal Classification
+# DCSFE-Net
 
 
 
