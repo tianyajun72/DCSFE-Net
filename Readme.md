@@ -1,5 +1,5 @@
 
-# DCSFE-Net: Physics-Aware Electromagnetic Signal Recognition for RIS-Aided Industrial IoT
+# DCSFE-Net
 
 <p align="center">
   <strong>Official Implementation and Experimental Results</strong>
